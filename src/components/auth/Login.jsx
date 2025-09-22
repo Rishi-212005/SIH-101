@@ -1,31 +1,31 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import InputField from '../../components/auth/InputField';
-import Button from '../../components/auth/Button';
-import FormCard from '../../components/auth/FormCard';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'student'
+    role: 'student',
+    rememberMe: false
   });
   
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
     { value: 'student', label: 'Student' },
     { value: 'mentor', label: 'Faculty Mentor' },
     { value: 'employer', label: 'Employer' },
-    { value: 'placement', label: 'Placement Cell' }
+    { value: 'placement', label: 'Placement Cell' },
+    { value: 'admin', label: 'Administrator' }
   ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     if (errors[name]) {
       setErrors(prev => ({
@@ -43,147 +43,163 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Here you would typically send the data to your backend
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 1500));
       console.log('Login data:', formData);
-      alert(`Login successful as ${formData.role}!`);
+      setIsLoading(false);
+      
       // Redirect based on role
-      navigate('/dashboard');
+      switch(formData.role) {
+        case 'student':
+          navigate('/student-dashboard');
+          break;
+        case 'mentor':
+          navigate('/mentor-dashboard');
+          break;
+        case 'employer':
+          navigate('/employer-dashboard');
+          break;
+        case 'placement':
+          navigate('/placement-dashboard');
+          break;
+        case 'admin':
+          navigate('/admin-dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
     }
   };
 
-  const handleDemoLogin = (role) => {
-    const demoCredentials = {
-      student: { email: 'student@demo.com', password: 'demo123' },
-      mentor: { email: 'mentor@demo.com', password: 'demo123' },
-      employer: { email: 'employer@demo.com', password: 'demo123' },
-      placement: { email: 'placement@demo.com', password: 'demo123' }
-    };
-    
-    setFormData({
-      ...demoCredentials[role],
-      role: role
-    });
-  };
-
   return (
-    <FormCard 
-      title="Welcome Back" 
-      subtitle="Sign in to your InternConnect account"
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Role Selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Login as
-          </label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-primary focus:ring-primary/20 transition-all duration-300"
-          >
-            {roles.map(role => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center text-2xl font-bold text-blue-600 mb-4 hover:text-blue-700 transition-colors">
+            <i className="fas fa-graduation-cap mr-2"></i>
+            InternConnect
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in to your InternConnect account</p>
         </div>
 
-        <InputField
-          label="Email Address"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-          required
-          error={errors.email}
-        />
+        {/* Login Form */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-blue-100">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Role Selection - Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <i className="fas fa-user-tag mr-2 text-blue-500"></i>
+                Login as <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all duration-300"
+              >
+                {roles.map(role => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <InputField
-          label="Password"
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          required
-          error={errors.password}
-        />
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <i className="fas fa-envelope mr-2 text-blue-500"></i>
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-300 ${
+                  errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                }`}
+                placeholder="Enter your email address"
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <span className="ml-2 text-sm text-gray-600">Remember me</span>
-          </label>
-          <button
-            type="button"
-            className="text-sm text-primary hover:text-indigo-700 transition-colors duration-300"
-          >
-            Forgot password?
-          </button>
-        </div>
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <i className="fas fa-lock mr-2 text-blue-500"></i>
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-300 ${
+                  errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                }`}
+                placeholder="Enter your password"
+              />
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </div>
 
-        <Button type="submit" variant="primary">
-          Sign In
-        </Button>
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              </label>
+              <button
+                type="button"
+                className="text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-300"
+              >
+                Forgot password?
+              </button>
+            </div>
 
-        {/* Demo Login Buttons */}
-        <div className="mt-6">
-          <p className="text-center text-sm text-gray-600 mb-3">Quick Demo Login:</p>
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('student')}
-            >
-              Student Demo
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('mentor')}
-            >
-              Mentor Demo
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('employer')}
-            >
-              Employer Demo
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => handleDemoLogin('placement')}
-            >
-              Placement Demo
-            </Button>
-          </div>
-        </div>
-
-        <div className="text-center mt-4">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+            {/* Submit Button */}
             <button
-              type="button"
-              onClick={() => navigate('/register')}
-              className="text-primary hover:text-indigo-700 font-semibold transition-colors duration-300"
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              Create one here
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Signing In...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center">
+                  <i className="fas fa-sign-in-alt mr-2 group-hover:scale-110 transition-transform"></i>
+                  Sign In to {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Dashboard
+                </span>
+              )}
             </button>
-          </p>
+
+            {/* Register Link */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 underline">
+                  Create one here
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
-      </form>
-    </FormCard>
+      </div>
+    </div>
   );
 };
 
