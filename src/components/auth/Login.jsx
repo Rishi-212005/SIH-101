@@ -77,6 +77,9 @@ const handleSubmit = async (e) => {
       case 'employer':
         navigate('/employer-dashboard');
         break;
+      case 'placementcell':
+        navigate('/admin-dashboard');
+        break;
       case 'admin':
         navigate('/admin-dashboard');
         break;
