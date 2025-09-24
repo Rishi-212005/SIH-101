@@ -21,7 +21,7 @@ const Login = () => {
     { value: 'student', label: 'Student' },
     { value: 'mentor', label: 'Faculty Mentor' },
     { value: 'employer', label: 'Employer' },
-    { value: 'placement', label: 'Placement Cell' },
+    { value: 'placementcell', label: 'Placement Cell' },
     { value: 'admin', label: 'Administrator' },
   ];
 
@@ -69,7 +69,7 @@ const handleSubmit = async (e) => {
     // Redirect based on role
     switch(data.user.role) {
       case 'student':
-        navigate('/student-dashboard');
+        navigate('/test-dashboard');
         break;
       case 'mentor':
         navigate('/mentor-dashboard');
@@ -80,6 +80,9 @@ const handleSubmit = async (e) => {
       case 'admin':
         navigate('/admin-dashboard');
         break;
+        case 'placementcell':
+         navigate('/admin-dashboard');
+        break
       default:
         navigate('/dashboard');
     }
