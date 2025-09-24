@@ -85,16 +85,35 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Registration data:', formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (validateForm()) {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        alert(data.message || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong!");
+    } finally {
       setIsLoading(false);
-      navigate('/login');
     }
-  };
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
