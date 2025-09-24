@@ -5,9 +5,9 @@ import {
   DepartmentStats,
   RecentActivity,
   QuickActions,
-  UpcomingInterviews
-} from './Dashboard';
-import { JobList } from './JobManagement';
+  UpcomingInterviews,
+  JobList
+} from '.';
 
 const AdminDashboard = () => {
   const [jobs, setJobs] = useState([
