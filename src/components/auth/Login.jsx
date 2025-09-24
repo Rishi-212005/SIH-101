@@ -3,38 +3,42 @@ import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
+
+  // Form state
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     role: 'student',
-    rememberMe: false
+    rememberMe: false,
   });
-  
+
+  // Error and loading state
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Role options
   const roles = [
     { value: 'student', label: 'Student' },
     { value: 'mentor', label: 'Faculty Mentor' },
     { value: 'employer', label: 'Employer' },
     { value: 'placement', label: 'Placement Cell' },
-    { value: 'admin', label: 'Administrator' }
+    { value: 'admin', label: 'Administrator' },
   ];
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
+
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
+  // Basic form validation
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -43,43 +47,57 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Login data:', formData);
-      setIsLoading(false);
-      
-      // Redirect based on role
-      switch(formData.role) {
-        case 'student':
-          navigate('/student-dashboard');
-          break;
-        case 'mentor':
-          navigate('/mentor-dashboard');
-          break;
-        case 'employer':
-          navigate('/employer-dashboard');
-          break;
-        case 'placement':
-          navigate('/placement-dashboard');
-          break;
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
-        default:
-          navigate('/dashboard');
-      }
+  // Handle form submission
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
+
+  setIsLoading(true);
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    console.log('Login successful:', data.user);
+
+    // Redirect based on role
+    switch(data.user.role) {
+      case 'student':
+        navigate('/student-dashboard');
+        break;
+      case 'mentor':
+        navigate('/mentor-dashboard');
+        break;
+      case 'employer':
+        navigate('/employer-dashboard');
+        break;
+      default:
+        navigate('/dashboard');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setErrors({ general: err.message });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center text-2xl font-bold text-blue-600 mb-4 hover:text-blue-700 transition-colors">
+          <Link
+            to="/"
+            className="inline-flex items-center text-2xl font-bold text-blue-600 mb-4 hover:text-blue-700 transition-colors"
+          >
             <i className="fas fa-graduation-cap mr-2"></i>
             InternConnect
           </Link>
@@ -90,7 +108,7 @@ const Login = () => {
         {/* Login Form */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 border border-blue-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Role Selection - Dropdown */}
+            {/* Role Selection */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 <i className="fas fa-user-tag mr-2 text-blue-500"></i>
@@ -102,7 +120,7 @@ const Login = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all duration-300"
               >
-                {roles.map(role => (
+                {roles.map((role) => (
                   <option key={role.value} value={role.value}>
                     {role.label}
                   </option>
@@ -122,7 +140,9 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-300 ${
-                  errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                  errors.email
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
                 }`}
                 placeholder="Enter your email address"
               />
@@ -141,7 +161,9 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none transition-all duration-300 ${
-                  errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                  errors.password
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
                 }`}
                 placeholder="Enter your password"
               />
@@ -168,6 +190,11 @@ const Login = () => {
               </button>
             </div>
 
+            {/* General Error */}
+            {errors.general && (
+              <p className="text-red-500 text-sm mt-1 text-center">{errors.general}</p>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -191,7 +218,10 @@ const Login = () => {
             <div className="text-center pt-4 border-t border-gray-200">
               <p className="text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 underline">
+                <Link
+                  to="/register"
+                  className="text-blue-600 font-semibold hover:text-blue-700 transition-colors duration-300 underline"
+                >
                   Create one here
                 </Link>
               </p>
