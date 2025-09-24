@@ -82,10 +82,10 @@ const handleSubmit = async (e) => {
         break;
       case 'placement':
       case 'placementcell':
-        navigate('/admin-dashboard');
+        navigate('/admin-dashboard', { replace: true });
         break;
       case 'admin':
-        navigate('/admin-dashboard');
+        navigate('/admin-dashboard', { replace: true });
         break;
       default:
         navigate('/dashboard');
