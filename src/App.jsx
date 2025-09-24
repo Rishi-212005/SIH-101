@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import TestDashboard from "./pages/TestDashboard";
+import AdminDashboard from "./components/admin/AdminDashboard";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/test-dashboard" element={<TestDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
           
           
