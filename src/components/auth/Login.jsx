@@ -21,7 +21,7 @@ const Login = () => {
     { value: 'student', label: 'Student' },
     { value: 'mentor', label: 'Faculty Mentor' },
     { value: 'employer', label: 'Employer' },
-    { value: 'placement', label: 'Placement Cell' },
+    { value: 'placementcell', label: 'Placement Cell' },
     { value: 'admin', label: 'Administrator' },
   ];
 
@@ -66,8 +66,11 @@ const handleSubmit = async (e) => {
 
     console.log('Login successful:', data.user);
 
+    // Normalize role (handle variants like 'placement')
+    const normalizedRole = (data.user.role || '').toString().toLowerCase().replace(/\s+/g, '');
+
     // Redirect based on role
-    switch(data.user.role) {
+    switch(normalizedRole) {
       case 'student':
         navigate('/student-dashboard');
         break;
@@ -77,6 +80,7 @@ const handleSubmit = async (e) => {
       case 'employer':
         navigate('/employer-dashboard');
         break;
+      case 'placement':
       case 'placementcell':
         navigate('/admin-dashboard');
         break;
