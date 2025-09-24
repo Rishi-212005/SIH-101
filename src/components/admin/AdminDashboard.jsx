@@ -1,13 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, Suspense } from 'react';
 import {
   MetricCards,
-  PlacementChart,
   DepartmentStats,
   RecentActivity,
   QuickActions,
   UpcomingInterviews,
   JobList
 } from '.';
+import ErrorBoundary from './ErrorBoundary';
+
+const PlacementChart = React.lazy(() => import('./Dashboard/PlacementChart'));
 
 const AdminDashboard = () => {
   const [jobs, setJobs] = useState([
@@ -76,7 +78,11 @@ const AdminDashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2">
-            <PlacementChart data={placementData} />
+            <ErrorBoundary fallback={<div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">Charts unavailable</div>}>
+              <Suspense fallback={<div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">Loading chart…</div>}>
+                <PlacementChart data={placementData} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
           <div>
             <DepartmentStats stats={departmentStats} />
